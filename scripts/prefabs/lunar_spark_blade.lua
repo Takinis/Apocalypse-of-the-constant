@@ -130,9 +130,9 @@ local function OnFinished(inst)
             local fling_y_speed = 8  -- 设置投掷高度
         if loot.Physics ~= nil then
             local angle = 10
-            local speed = 2     
+            local speed = 2
                 local sinangle = math.sin(angle)
-                local cosangle = math.cos(angle)                
+                local cosangle = math.cos(angle)
                 loot.Physics:SetVel(speed * cosangle, GetRandomWithVariance(y_speed, y_speed_variance), speed * -sinangle)
             end
         end
@@ -174,6 +174,58 @@ end
 
 local function OnLungedHit(inst, doer, target)
 
+end
+
+-------------------------------------------------------------
+local function OnHit(self, doer, target)
+    if self.onprehitfn ~= nil then
+        self.onprehitfn(self.inst, doer, target)
+    end
+
+    local targetisworkable = false
+    if target.components.workable then
+        local work_action = target.components.workable:GetWorkAction()
+
+        --V2C: nil action for NPC_workable (e.g. campfires)
+        targetisworkable =
+            (   not work_action and target:HasTag("NPC_workable")    ) or
+            (   target.components.workable:CanBeWorked() and
+                self.workactions[work_action] and
+                (   work_action ~= ACTIONS.DIG or
+                    (   target.components.spawner == nil and target.components.childspawner == nil  )
+                )
+            )
+    end
+
+    local did_hit = false
+    if targetisworkable then
+        target.components.workable:Destroy(doer)
+        if target:IsValid() and target:HasTag("stump") then
+            target:Remove()
+        end
+
+        did_hit = true
+    elseif self.canpick and target.components.pickable and target.components.pickable:CanBePicked()
+            and not target:HasTag("intense") then
+		target.components.pickable:Pick(self.inst) --don't pass doer or they'll pocket the loot
+
+        did_hit = true
+    elseif doer.components.combat:CanTarget(target) and not doer.components.combat:IsAlly(target) and target.components.combat ~= nil then
+        --doer.components.combat:DoAttack(target, nil, nil, self.stimuli)
+        target.components.combat:GetAttacked(doer, 999, self.inst, self.stimuli, { planar = 999 })
+
+        did_hit = true
+    end
+
+    if did_hit then
+        if self.onhitfn then
+            self.onhitfn(self.inst, doer, target)
+        end
+    else
+        if self.onmissfn then
+            self.onmissfn(self.inst, doer, target)
+        end
+    end
 end
 
 local function OnDischarged(inst)
@@ -268,6 +320,7 @@ local function fn()
     -- inst.components.aoeweapon_lunge:SetStimuli("electric")
     inst.components.aoeweapon_lunge:SetWorkActions()
     inst.components.aoeweapon_lunge:SetTags("_combat")
+    inst.components.aoeweapon_lunge.OnHit = OnHit
 
     inst:AddComponent("aoespell")
     inst.components.aoespell:SetSpellFn(SpellFn)
