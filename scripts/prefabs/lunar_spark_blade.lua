@@ -212,7 +212,7 @@ local function OnHit(self, doer, target)
         did_hit = true
     elseif doer.components.combat:CanTarget(target) and not doer.components.combat:IsAlly(target) and target.components.combat ~= nil then
         --doer.components.combat:DoAttack(target, nil, nil, self.stimuli)
-        target.components.combat:GetAttacked(doer, 999, self.inst, self.stimuli, { planar = 999 })
+        target.components.combat:GetAttacked(doer, 68, self.inst, self.stimuli, { planar = 38 })
 
         did_hit = true
     end
