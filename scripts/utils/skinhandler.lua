@@ -125,9 +125,6 @@ end
 local spawn_prefab = SpawnPrefab
 SpawnPrefab = function(name, skin, skin_id, creator, ...)
     local ent = spawn_prefab(name, skin, skin_id, creator, ...)
-    if(skin == nil or skin_id == nil) then
-    return spawn_prefab(name)
-    end
     if validate_mod_skin(skin, creator) then
         init_mod_skin(ent, skin)
     end
