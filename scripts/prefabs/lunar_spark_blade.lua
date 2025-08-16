@@ -147,13 +147,21 @@ local function GetDamage(inst, attacker, target)
 end
 
 local function OnAttack(inst, attacker, target)
+    local targetvalid = target ~= nil and target:IsValid()
+
+    if inst.components.dc_chargeable_item:GetPercent() >= 0.6 then
+        if targetvalid then
+            target:PushEventImmediate("electrocute")
+        end
+    end
+
     if attacker.sg and attacker.sg.currentstate.name == "lunar_spark_blade_leap" then
         inst.components.dc_chargeable_item:DoDelta(-8)
     else
         inst.components.dc_chargeable_item:DoDelta(1)
     end
 
-    if target ~= nil and target:IsValid() then
+    if targetvalid then
         SpawnPrefab("hitsparks_fx"):Setup(attacker, target)
     end
 end
@@ -173,7 +181,9 @@ local function OnLunged(inst, doer, startingpos, targetpos)
 end
 
 local function OnLungedHit(inst, doer, target)
-
+    if target ~= nil and target:IsValid() then
+        target:PushEventImmediate("electrocute")
+    end
 end
 
 -------------------------------------------------------------
@@ -212,7 +222,7 @@ local function OnHit(self, doer, target)
         did_hit = true
     elseif doer.components.combat:CanTarget(target) and not doer.components.combat:IsAlly(target) and target.components.combat ~= nil then
         --doer.components.combat:DoAttack(target, nil, nil, self.stimuli)
-        target.components.combat:GetAttacked(doer, 68, self.inst, self.stimuli, { planar = 38 })
+        target.components.combat:GetAttacked(doer, 999, self.inst, self.stimuli, { planar = 999 })
 
         did_hit = true
     end
@@ -320,7 +330,6 @@ local function fn()
     -- inst.components.aoeweapon_lunge:SetStimuli("electric")
     inst.components.aoeweapon_lunge:SetWorkActions()
     inst.components.aoeweapon_lunge:SetTags("_combat")
-    inst.components.aoeweapon_lunge.OnHit = OnHit
 
     inst:AddComponent("aoespell")
     inst.components.aoespell:SetSpellFn(SpellFn)
