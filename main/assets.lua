@@ -20,6 +20,8 @@ PrefabFiles = {
 
     "knightmare_clue_map",
     "knightmare_clue_ground_fx",
+
+    "boat_aoc",
 }
 
 Assets = {

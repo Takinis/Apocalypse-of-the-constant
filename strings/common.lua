@@ -41,6 +41,7 @@ return {
         LUNAR_SPARK_BLADE = "Spark Blade",
         NIGHTMAREHAT = "Darknight Helm",
         WOODS_SHADELING = "Laboring Horror",
+        BOAT_SATELLITE = "Crashed Machine",
     },
     RECIPE_DESC = {
         DREADSPEAR = "TODO",
